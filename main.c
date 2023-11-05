@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <ch32v00x.h>
 
-#define WS2812_MAX_LEDS     128
+#define WS2812_MAX_LEDS     512
 
 // convert one 8bit to 32bits.
 // 0 code 0.33us/H, 1us/L, 0x08/0b1000
