@@ -16,7 +16,7 @@ volatile uint8_t cid = SPI_RESET_COUNT;
 volatile uint16_t pid = 0;
 volatile uint8_t pixel[WS2812_MAX_LEDS * 3] = {0};
 volatile uint16_t i2c_flag = 0, i2c_reg = 0;
-const uint8_t pixel_map[4] = {0x88, 0x8e, 0xe8, 0xee};
+const uint8_t pixel_map[4] = {0x88, 0x8c, 0xc8, 0xcc};
 
 INTERRUPT void SPI1_IRQHandler(void)
 {
@@ -24,7 +24,7 @@ INTERRUPT void SPI1_IRQHandler(void)
         // color id range [0:3]: we send color by bit.
         // color id range [4:84]: we send zero only as reset.
         if (cid < 4) {
-            uint8_t pos = (3 - cid) << 1;
+            uint8_t pos = cid << 1;
             SPI1->DATAR = pixel_map[(pixel[pid] >> pos) & 0b11];
 
             // one color has send to end, move to next color.
@@ -162,3 +162,4 @@ int main(void)
 
     while(1);
 }
+
