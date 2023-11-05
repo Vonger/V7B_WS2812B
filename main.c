@@ -6,13 +6,13 @@
 // convert one 8bit to 32bits.
 // 0 code 0.33us/H, 1us/L, 0x08/0b1000
 // 1 code 0.66us/H, 0.66us/L, 0x0c/0b1100
-// reset 50us/L, 160bits, 10bytes of SPI.
-#define SPI_RESET_BYTE    (4 + 20)
+// reset 50us/L, 160bits, at least 10bytes of SPI.
+#define SPI_RESET_COUNT     25
 
 // use same address as IS31FL3731
-#define I2C_ADDRESS       0x74
+#define I2C_ADDRESS         0x74
 
-volatile uint8_t cid = SPI_RESET_BYTE;
+volatile uint8_t cid = SPI_RESET_COUNT;
 volatile uint16_t pid = 0;
 volatile uint8_t pixel[WS2812_MAX_LEDS * 3] = {0};
 volatile uint16_t i2c_flag = 0, i2c_reg = 0;
@@ -33,7 +33,7 @@ INTERRUPT void SPI1_IRQHandler(void)
                 if (++pid >= sizeof(pixel)) {
                     pid = 0;
                     // we need to send reset to leds to show colors.
-                    cid = SPI_RESET_BYTE;
+                    cid = SPI_RESET_COUNT;
                 } else {
                     // rearm the color id to send next color.
                     cid = 4;
