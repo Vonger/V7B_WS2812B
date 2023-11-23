@@ -24,8 +24,7 @@ INTERRUPT void SPI1_IRQHandler(void)
         // color id range [0:3]: we send color by bit.
         // color id range [4:84]: we send zero only as reset.
         if (cid < 4) {
-            uint8_t pos = cid << 1;
-            SPI1->DATAR = pixel_map[(pixel[pid] >> pos) & 0b11];
+            SPI1->DATAR = pixel_map[(pixel[pid] >> (cid << 1)) & 3];
 
             // one color has send to end, move to next color.
             if (cid == 0) {
@@ -51,7 +50,7 @@ INTERRUPT void SPI1_IRQHandler(void)
 INTERRUPT void I2C1_EV_IRQHandler(void)
 {
     if (I2C_GetFlagStatus(I2C1, I2C_FLAG_ADDR)) {
-        (void)(I2C1->STAR2); // clear flag.
+        (void)(I2C1->STAR2); // read to clear flag.
         // get address, new transfer begin.
         i2c_reg = i2c_flag = 0;
     } else if (I2C_GetFlagStatus(I2C1, I2C_FLAG_RXNE)) {
@@ -89,8 +88,8 @@ void spi_init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 
-    // C5, C6 for SPI clock and data, actually we only use C6.
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6;
+    // PC6 for SPI data, PC5 for clock is not used.
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
@@ -153,13 +152,35 @@ void i2c_init(void)
 
 int main(void)
 {
-    // use internal high speed(HSI), 48MHz.
+    // use internal high speed clock(HSI), 48MHz.
     SystemCoreClockUpdate();
     Delay_Init();
 
     spi_init();
     i2c_init();
 
-    while(1);
+
+#ifdef UNIT_TEST
+    uint8_t count = 0, dir = 0, color = 0;
+    while (1) {
+        for(int i = color; i < 48; i += 3)
+            pixel[i] = count;
+        Delay_Ms(10);
+
+        if (dir) {
+            if (++count == 0)
+                dir = 0;
+        } else {
+            if (--count == 0) {
+                dir = 1;
+
+                if (++color >= 3)
+                    color = 0;
+            }
+        }
+    }
+#else
+    while (1);
+#endif
 }
 
