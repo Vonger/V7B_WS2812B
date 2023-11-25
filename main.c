@@ -159,7 +159,6 @@ int main(void)
     spi_init();
     i2c_init();
 
-
 #ifdef UNIT_TEST
     uint8_t count = 0, dir = 0, color = 0;
     while (1) {
@@ -168,12 +167,13 @@ int main(void)
         Delay_Ms(10);
 
         if (dir) {
-            if (++count == 0)
+            if (++count == 0) {
                 dir = 0;
+                count = 254;
+            }
         } else {
             if (--count == 0) {
                 dir = 1;
-
                 if (++color >= 3)
                     color = 0;
             }
