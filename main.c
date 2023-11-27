@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <ch32v00x.h>
 
-#define WS2812_MAX_LEDS     512
+#define WS2812_MAX_LEDS     16
 
 // convert one 8bit to 32bits.
 // 0 code 0.33us/H, 1us/L, 0x08/0b1000
@@ -16,7 +16,7 @@ volatile static uint8_t cid = SPI_RESET_COUNT;
 volatile static uint16_t pid;
 volatile static uint8_t pixel[WS2812_MAX_LEDS * 3];
 volatile static uint16_t i2c_flag, i2c_reg;
-const uint8_t pixel_map[4] = {0x88, 0x8c, 0xc8, 0xcc};
+const uint8_t pixel_map[4] = {0x88, 0x8e, 0xe8, 0xee};
 
 INTERRUPT void SPI1_IRQHandler(void)
 {
