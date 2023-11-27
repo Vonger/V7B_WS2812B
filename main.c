@@ -12,10 +12,10 @@
 // use same address as IS31FL3731
 #define I2C_ADDRESS         0x74
 
-volatile uint8_t cid = SPI_RESET_COUNT;
-volatile uint16_t pid = 0;
-volatile uint8_t pixel[WS2812_MAX_LEDS * 3] = {0};
-volatile uint16_t i2c_flag = 0, i2c_reg = 0;
+volatile static uint8_t cid = SPI_RESET_COUNT;
+volatile static uint16_t pid;
+volatile static uint8_t pixel[WS2812_MAX_LEDS * 3];
+volatile static uint16_t i2c_flag, i2c_reg;
 const uint8_t pixel_map[4] = {0x88, 0x8c, 0xc8, 0xcc};
 
 INTERRUPT void SPI1_IRQHandler(void)
@@ -50,7 +50,7 @@ INTERRUPT void SPI1_IRQHandler(void)
 INTERRUPT void I2C1_EV_IRQHandler(void)
 {
     if (I2C_GetFlagStatus(I2C1, I2C_FLAG_ADDR)) {
-        (void)(I2C1->STAR2); // read to clear flag.
+        (volatile void)(I2C1->STAR2); // read to clear flag.
         // get address, new transfer begin.
         i2c_reg = i2c_flag = 0;
     } else if (I2C_GetFlagStatus(I2C1, I2C_FLAG_RXNE)) {
@@ -71,9 +71,6 @@ INTERRUPT void I2C1_EV_IRQHandler(void)
             I2C_SendData(I2C1, pixel[i2c_reg++]);
         else
             I2C_SendData(I2C1, 0x00);
-    } else if (I2C_GetFlagStatus(I2C1, I2C_FLAG_AF)) {
-        I2C_SendData(I2C1, pixel[i2c_reg++]);
-        I2C1->STAR1 &= ~I2C_FLAG_AF;
     } else if (I2C_GetFlagStatus(I2C1, I2C_FLAG_STOPF)) {
         I2C1->CTLR1 &= I2C1->CTLR1;
     }
@@ -153,7 +150,6 @@ void i2c_init(void)
 
 int main(void)
 {
-    // use internal high speed clock(HSI), 48MHz.
     SystemCoreClockUpdate();
     Delay_Init();
 
