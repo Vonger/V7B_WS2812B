@@ -1,8 +1,6 @@
 #include <stdint.h>
 #include <ch32v00x.h>
 
-#define WS2812_MAX_LEDS     16
-
 // convert one 8bit to 32bits.
 // 0 code 0.33us/H, 1us/L, 0x08/0b1000
 // 1 code 0.66us/H, 0.66us/L, 0x0c/0b1100
@@ -12,6 +10,7 @@
 // use same address as IS31FL3731
 #define I2C_ADDRESS         0x74
 
+#define WS2812_MAX_LEDS     16
 volatile static uint8_t cid = SPI_RESET_COUNT;
 volatile static uint16_t pid;
 volatile static uint8_t pixel[WS2812_MAX_LEDS * 3];
@@ -67,10 +66,7 @@ INTERRUPT void I2C1_EV_IRQHandler(void)
             break;
         }
     } else if (I2C_GetFlagStatus(I2C1, I2C_FLAG_TXE)) {
-        if (i2c_reg < sizeof(pixel))
-            I2C_SendData(I2C1, pixel[i2c_reg++]);
-        else
-            I2C_SendData(I2C1, 0x00);
+        I2C_SendData(I2C1, i2c_reg < sizeof(pixel) ? pixel[i2c_reg++] : 0x00);
     } else if (I2C_GetFlagStatus(I2C1, I2C_FLAG_STOPF)) {
         I2C1->CTLR1 &= I2C1->CTLR1;
     }
@@ -159,7 +155,7 @@ int main(void)
 #ifdef UNIT_TEST
     uint8_t count = 0, dir = 0, color = 0;
     while (1) {
-        for(int i = color; i < 48; i += 3)
+        for(int i = color; i < sizeof(pixel); i += 3)
             pixel[i] = count;
         Delay_Ms(10);
 
