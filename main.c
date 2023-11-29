@@ -10,7 +10,7 @@
 // use same address as IS31FL3731
 #define I2C_ADDRESS         0x74
 
-#define WS2812_MAX_LEDS     16
+#define WS2812_MAX_LEDS     512
 volatile static uint8_t cid = SPI_RESET_COUNT;
 volatile static uint16_t pid;
 volatile static uint8_t pixel[WS2812_MAX_LEDS * 3];
@@ -56,8 +56,7 @@ INTERRUPT void I2C1_EV_IRQHandler(void)
         switch (i2c_flag) {
         case 0:   // receive register address low byte.
         case 1:   // receive register address high byte.
-            i2c_reg |= (uint16_t)I2C_ReceiveData(I2C1) << (8 * i2c_flag);
-            i2c_flag++;
+            i2c_reg |= (uint16_t)I2C_ReceiveData(I2C1) << (8 * i2c_flag++);
             break;
 
         default:
@@ -81,7 +80,7 @@ void spi_init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 
-    // SPI use PC6
+    // WS2812B => PC6
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -120,7 +119,7 @@ void i2c_init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 
-    // I2C use PC1, PC2
+    // I2CDAT => PC1, I2CCLK => PC2
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -135,8 +134,8 @@ void i2c_init(void)
     I2C_Init(I2C1, &I2C_InitTSturcture);
 
     NVIC_InitStructure.NVIC_IRQChannel = I2C1_EV_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
@@ -152,7 +151,7 @@ int main(void)
     spi_init();
     i2c_init();
 
-#ifdef UNIT_TEST
+#ifdef UNITTEST_LED_BREATH
     uint8_t count = 0, dir = 0, color = 0;
     while (1) {
         for(int i = color; i < sizeof(pixel); i += 3)
