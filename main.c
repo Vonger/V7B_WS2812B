@@ -98,7 +98,6 @@ void spi_init(void)
     SPI_InitStructure.SPI_CRCPolynomial = 7;
     SPI_Init(SPI1, &SPI_InitStructure);
 
-    // SPI interrupt setup.
     NVIC_InitStructure.NVIC_IRQChannel = SPI1_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
@@ -135,6 +134,8 @@ void i2c_init(void)
 
     NVIC_InitStructure.NVIC_IRQChannel = I2C1_EV_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    // subpriority set to 8, for group 0 to enable interrupt preemption.
+    // enable this or WS2812B data will have wrong timing caused flicker.
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 8;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
