@@ -1,16 +1,25 @@
 #include <stdint.h>
 #include <ch32v00x.h>
 
+// IS31FL3731_COMPATIBLE:
+//     this mode we will use 8bit reg address, and allows page(but ignore them)
+//     and compatible IS31FL3731 write LEDs color.
+
 // convert one 8bit to 32bits.
 // 0 code 0.33us/H, 1us/L, 0x08/0b1000
 // 1 code 0.66us/H, 0.66us/L, 0x0c/0b1100
 // reset 50us/L, 160bits, at least 10bytes of SPI.
 #define SPI_RESET_COUNT     25
 
-// use same address as IS31FL3731
+#ifdef IS31FL3731_COMPATIBLE
 #define I2C_ADDRESS         0x74
+#define WS2812_MAX_LEDS     72
+volatile static uint8_t i2c_page;
+#else
+#define I2C_ADDRESS         0x74
+#define WS2812_MAX_LEDS     20
+#endif
 
-#define WS2812_MAX_LEDS     512
 volatile static uint8_t cid = SPI_RESET_COUNT;
 volatile static uint16_t pid;
 volatile static uint8_t pixel[WS2812_MAX_LEDS * 3];
@@ -53,17 +62,38 @@ INTERRUPT void I2C1_EV_IRQHandler(void)
         // get address, new transfer begin.
         i2c_reg = i2c_flag = 0;
     } else if (I2C_GetFlagStatus(I2C1, I2C_FLAG_RXNE)) {
+#ifdef IS31FL3731_COMPATIBLE
+        if (i2c_flag == 0) {
+            i2c_reg = I2C_ReceiveData(I2C1);
+            i2c_flag++;
+        } else if(i2c_reg == 0xfd) {
+            i2c_page = I2C_ReceiveData(I2C1);
+        } else if (i2c_page == 0) {
+            // WS2812 is GRB, but IS31 is RGB, need to convert.
+            uint8_t reg;
+            switch (i2c_reg % 3) {
+            case 0: reg = i2c_reg + 1; break;
+            case 1: reg = i2c_reg; break;
+            case 2: reg = i2c_reg + 2; break;
+            }
+            // offset with IS31 start address.
+            if (reg >= 0x24)
+                pixel[reg - 0x24] = I2C_ReceiveData(I2C1);
+            i2c_reg++;
+        }
+#else
         switch (i2c_flag) {
         case 0:   // receive register address low byte.
         case 1:   // receive register address high byte.
             i2c_reg |= (uint16_t)I2C_ReceiveData(I2C1) << (8 * i2c_flag++);
             break;
-
         default:
             if (i2c_reg < sizeof(pixel))
                 pixel[i2c_reg++] = I2C_ReceiveData(I2C1);
             break;
         }
+#endif
+
     } else if (I2C_GetFlagStatus(I2C1, I2C_FLAG_TXE)) {
         I2C_SendData(I2C1, i2c_reg < sizeof(pixel) ? pixel[i2c_reg++] : 0x00);
     } else if (I2C_GetFlagStatus(I2C1, I2C_FLAG_STOPF)) {
