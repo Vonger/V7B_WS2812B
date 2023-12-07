@@ -43,8 +43,8 @@ CFLAGS = \
 	$(INCLUDES) $(DEFINES)
 
 $(NAME): $(SOURCES)
-	@echo 'COMPILE $(shell echo $@ | tr '[a-z]' '[A-Z]') ...'
-	@$(CC) $(CFLAGS) -DDEVICE_$(shell echo $@ | tr '[a-z]' '[A-Z]') $^ $(LIBRARY) -o $(CURDIR)/$@.elf
+	@echo 'COMPILE $(NAME) ...'
+	@$(CC) $(CFLAGS) $^ $(LIBRARY) -o $(CURDIR)/$@.elf
 	@$(OBJCOPY) -O ihex $(CURDIR)/$@.elf $(CURDIR)/$@.hex
 	@$(OBJCOPY) -O binary $(CURDIR)/$@.elf $(CURDIR)/$@.bin
 	@$(OBJDUMP) --all-headers --demangle --disassemble --source $@.elf > $@.lst
