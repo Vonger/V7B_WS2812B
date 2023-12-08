@@ -182,7 +182,7 @@ int main(void)
     spi_init();
     i2c_init();
 
-#ifndef UNITTEST_LED_BREATH
+#ifdef UNITTEST_LED_BREATH
     uint8_t count = 0, dir = 0, color = 0;
     while (1) {
         for(int i = color; i < sizeof(pixel); i += 3)
