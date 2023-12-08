@@ -2,14 +2,14 @@
 #include <ch32v00x.h>
 
 // IS31FL3731_COMPATIBLE:
-//     this mode we will use 8bit reg address, and allows page(but ignore them)
-//     and compatible IS31FL3731 write LEDs color.
+//     this mode uses 8bit reg address, allows pages(but ignores them)
+//     and is compatible with IS31FL3731 register of LED colors.
 
 // convert one 8bit to 32bits.
 // 0 code 0.33us/H, 1us/L, 0x08/0b1000
 // 1 code 0.66us/H, 0.66us/L, 0x0c/0b1100
-// reset 50us/L, 160bits, at least 10bytes of SPI.
-#define SPI_RESET_COUNT     25
+// reset 50us/L, 160bits, 50 bytes of SPI around 120us.
+#define SPI_RESET_COUNT     50
 
 #ifdef IS31FL3731_COMPATIBLE
 #define I2C_ADDRESS         0x74
@@ -17,14 +17,14 @@
 volatile static uint8_t i2c_page;
 #else
 #define I2C_ADDRESS         0x74
-#define WS2812_MAX_LEDS     20
+#define WS2812_MAX_LEDS     512
 #endif
 
 volatile static uint8_t cid = SPI_RESET_COUNT;
 volatile static uint16_t pid;
 volatile static uint8_t pixel[WS2812_MAX_LEDS * 3];
 volatile static uint16_t i2c_flag, i2c_reg;
-const uint8_t pixel_map[4] = {0x88, 0x8e, 0xe8, 0xee};
+const uint8_t pixel_map[4] = {0x88, 0x8c, 0xc8, 0xcc};
 
 INTERRUPT void SPI1_IRQHandler(void)
 {
@@ -182,7 +182,7 @@ int main(void)
     spi_init();
     i2c_init();
 
-#ifdef UNITTEST_LED_BREATH
+#ifndef UNITTEST_LED_BREATH
     uint8_t count = 0, dir = 0, color = 0;
     while (1) {
         for(int i = color; i < sizeof(pixel); i += 3)
