@@ -1,5 +1,5 @@
 # this path needs to be customize.
-COMMON = $(CURDIR)/../ch32v003
+COMMON = $(CURDIR)/ch32v003
 TOOLCHAIN = ~/.riscv_toolchain/bin/riscv-none-embed
 OPENOCD = ~/.riscv_toolchain/OpenOCD/bin
 
