@@ -60,6 +60,9 @@ debug:
 	$(TOOLCHAIN)-gdb -ex "file $(CURDIR)/$(NAME).elf" -ex "b main" -ex "target remote 127.0.0.1:3333"
 	@-killall openocd
 
+test:
+	gcc ./misc/test.c -o test -lusb-1.0 $(DEFINES)
+
 clean:
 	@rm -f $(CURDIR)/*.elf $(CURDIR)/*.hex $(CURDIR)/*.map $(CURDIR)/*.lst $(CURDIR)/*.bin
 
