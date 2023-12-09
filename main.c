@@ -80,16 +80,25 @@ INTERRUPT void I2C1_EV_IRQHandler(void)
             if (reg >= 0x24)
                 pixel[reg - 0x24] = I2C_ReceiveData(I2C1);
             i2c_reg++;
+        } else {
+            // not page 0, read and ignore to avoid block.
+            I2C_ReceiveData(I2C1);
         }
 #else
         switch (i2c_flag) {
-        case 0:   // receive register address low byte.
-        case 1:   // receive register address high byte.
-            i2c_reg |= (uint16_t)I2C_ReceiveData(I2C1) << (8 * i2c_flag++);
+        case 0:   // receive register address high byte.
+            i2c_reg |= (uint16_t)I2C_ReceiveData(I2C1) << 8;
+            i2c_flag++;
+            break;
+        case 1:   // receive register address low byte.
+            i2c_reg |= (uint16_t)I2C_ReceiveData(I2C1);
+            i2c_flag++;
             break;
         default:
             if (i2c_reg < sizeof(pixel))
                 pixel[i2c_reg++] = I2C_ReceiveData(I2C1);
+            else
+                (volatile void)I2C_ReceiveData(I2C1);
             break;
         }
 #endif
