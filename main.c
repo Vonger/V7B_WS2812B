@@ -73,12 +73,16 @@ INTERRUPT void I2C1_EV_IRQHandler(void)
             uint8_t reg;
             switch (i2c_reg % 3) {
             case 0: reg = i2c_reg + 1; break;
-            case 1: reg = i2c_reg; break;
-            case 2: reg = i2c_reg + 2; break;
+            case 1: reg = i2c_reg - 1; break;
+            case 2: reg = i2c_reg; break;
             }
             // offset with IS31 start address.
-            if (reg >= 0x24)
+            if (i2c_reg >= 0x24) {
                 pixel[reg - 0x24] = I2C_ReceiveData(I2C1);
+            } else {
+                // receive but ignore.
+                I2C_ReceiveData(I2C1);
+            }
             i2c_reg++;
         } else {
             // not page 0, read and ignore to avoid block.
@@ -95,10 +99,11 @@ INTERRUPT void I2C1_EV_IRQHandler(void)
             i2c_flag++;
             break;
         default:
-            if (i2c_reg < sizeof(pixel))
+            if (i2c_reg < sizeof(pixel)) {
                 pixel[i2c_reg++] = I2C_ReceiveData(I2C1);
-            else
-                (volatile void)I2C_ReceiveData(I2C1);
+            } else {
+                I2C_ReceiveData(I2C1);
+            }
             break;
         }
 #endif
