@@ -417,7 +417,7 @@ int main(int argc, char *argv[])
             color = ++color % 3;
         }
 
-        usleep(10000);
+        usleep(100000);
     }
 
 #else // default 512 LEDs mode.
