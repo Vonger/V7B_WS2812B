@@ -61,7 +61,7 @@ debug:
 	@-killall openocd
 
 test:
-	gcc ./misc/test.c -o test -lusb-1.0 $(DEFINES)
+	gcc ./misc/test.c -o ledtest -lusb-1.0 $(DEFINES)
 
 clean:
 	@rm -f $(CURDIR)/*.elf $(CURDIR)/*.hex $(CURDIR)/*.map $(CURDIR)/*.lst $(CURDIR)/*.bin
