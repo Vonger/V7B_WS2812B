@@ -9,7 +9,11 @@
 #include <libusb-1.0/libusb.h>
 
 #define MAX_I2C_PACK 16         // V7B: 16, MPRO: 59
+#ifndef min
 #define min(a, b)    ((a) < (b) ? (a) : (b))
+#endif
+
+#define MAX_RGB_LED    24
 
 static libusb_context *context = NULL;
 static libusb_device_handle *handle = NULL;
@@ -406,9 +410,9 @@ int main(int argc, char *argv[])
     v2s_i2c_write_reg8(0x74, 0, reg, 0x12);
 
     while (1) {
-        uint8_t d[20 * 3] = {0};
+        uint8_t d[MAX_RGB_LED * 3] = {0};
 
-        d[color + count * 3] = 0x10;
+        d[color + count * 3] = 0xff;
         v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
 
         count++;
@@ -417,13 +421,13 @@ int main(int argc, char *argv[])
             color = ++color % 3;
         }
 
-        usleep(100000);
+        usleep(10000);
     }
 
 #else // default 512 LEDs mode.
 
     while (1) {
-        uint8_t d[20 * 3] = {0};
+        uint8_t d[MAX_RGB_LED * 3] = {0};
 
         d[color + count * 3] = 0x10;
         v2s_i2c_write_reg16s(0x74, 0, d, sizeof(d));
@@ -431,10 +435,11 @@ int main(int argc, char *argv[])
         count++;
         if (count >= sizeof(d) / 3) {
             count = 0;
-            color = ++color % 3;
+            color++;
+            color %= 3;
         }
 
-        usleep(100000);
+        usleep(10000);
     }
 
 #endif

@@ -1,7 +1,7 @@
 # this path needs to be customize.
 COMMON = $(CURDIR)/ch32v003
-TOOLCHAIN = ~/.riscv_toolchain/bin/riscv-none-embed
-OPENOCD = ~/.riscv_toolchain/OpenOCD/bin
+TOOLCHAIN = ~/.toolchain/riscv/bin/riscv-none-elf
+OPENOCD = ~/.toolchain/openocd/bin
 
 # follow code do not need to modify.
 NAME = $(notdir $(CURDIR))
@@ -62,7 +62,9 @@ debug:
 
 test:
 	gcc ./misc/test.c -o ledtest -lusb-1.0 $(DEFINES)
+test_w64:
+	x86_64-w64-mingw32-gcc misc/test.c ../mpro/tools/mprotool/libusb/MinGW64/static/libusb-1.0.a -o ledtest.exe -I../mpro/tools/mprotool/libusb/include $(DEFINES)
 
 clean:
-	@rm -f $(CURDIR)/*.elf $(CURDIR)/*.hex $(CURDIR)/*.map $(CURDIR)/*.lst $(CURDIR)/*.bin
+	@rm -f $(CURDIR)/*.elf $(CURDIR)/*.hex $(CURDIR)/*.map $(CURDIR)/*.lst
 
