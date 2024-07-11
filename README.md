@@ -9,3 +9,8 @@ note: IS31FL3731 compatible mode register address only use 1bytes, so max suppor
 
 - ws2812b.is31.bin: this is compatible IS31FL3731 firmware.
 - ws2812b.full.bin: this is not compatible but can use all ws2812b in line firmware.
+
+### Link
+
+ - WCH CH32V003 RISCV toolchain: http://www.mounriver.com/download => Linux => MRS_Toolchain_Linux_x64_VX.XX.tar.xz
+ - install libjlink0 for openocd(apt install libjlink0).
