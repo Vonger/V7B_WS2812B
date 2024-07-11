@@ -12,5 +12,6 @@ note: IS31FL3731 compatible mode register address only use 1bytes, so max suppor
 
 ### Link
 
+ - Compile in Ubuntu 22.04
  - WCH CH32V003 RISCV toolchain: http://www.mounriver.com/download => Linux => MRS_Toolchain_Linux_x64_VX.XX.tar.xz
  - install libjlink0 for openocd(apt install libjlink0).
