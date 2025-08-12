@@ -1,6 +1,6 @@
 # this path needs to be customize.
 COMMON = $(CURDIR)/ch32v003
-TOOLCHAIN = ~/.toolchain/riscv/bin/riscv-none-elf
+TOOLCHAIN = riscv-none-elf
 OPENOCD = ~/.toolchain/openocd/bin
 
 # follow code do not need to modify.
@@ -28,7 +28,8 @@ LIBRARY = \
 
 OBJECTS = $(SOURCES:%.c=%.o)
 
-DEFINES = -DSYSCLK_FREQ_48MHZ_HSI=48000000 -DIS31FL3731_COMPATIBLE
+DEFINES = -DSYSCLK_FREQ_48MHZ_HSI=48000000
+#DEFINES = -DSYSCLK_FREQ_48MHZ_HSI=48000000 -DIS31FL3731_COMPATIBLE
 	
 CFLAGS = \
 	-march=rv32ecxw -mabi=ilp32e -msmall-data-limit=8 \
