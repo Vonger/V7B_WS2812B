@@ -408,21 +408,49 @@ int main(int argc, char *argv[])
     uint8_t reg[0x12];
     memset(reg, 0xff, 0x12);
     v2s_i2c_write_reg8(0x74, 0, reg, 0x12);
-
     while (1) {
-        uint8_t d[MAX_RGB_LED * 3] = {0};
+            uint8_t d[MAX_RGB_LED * 3] = {0};
 
-        d[color + count * 3] = 0xff;
-        v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
+            for (int color = 0; color < 3; color++) {
+                for (int count = 0; count < MAX_RGB_LED; count++) {
+                    memset(d, 0, sizeof(d));
+                    d[color + count * 3] = 0xff;
+                    v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
+                    usleep(10000);
+                }
+            }
 
-        count++;
-        if (count >= sizeof(d) / 3) {
-            count = 0;
-            color = ++color % 3;
-        }
+            for (int color = 0; color < 3; color++) {
+                for (int count = MAX_RGB_LED - 1; count >= 0; count--) {
+                    memset(d, 0, sizeof(d));
+                    d[color + count * 3] = 0xff;
+                    v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
+                    usleep(10000);
+                }
+            }
 
-        usleep(10000);
+            memset(d, 0, sizeof(d));
+            for (int count = 0; count < MAX_RGB_LED; count++) {
+                d[count * 3] = 0xff;
+            }
+            v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
+            sleep(1);
+
+            memset(d, 0, sizeof(d));
+            for (int count = 0; count < MAX_RGB_LED; count++) {
+                d[count * 3 + 1] = 0xff;
+            }
+            v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
+            sleep(1);
+
+            memset(d, 0, sizeof(d));
+            for (int count = 0; count < MAX_RGB_LED; count++) {
+                d[count * 3 + 2] = 0xff;
+            }
+            v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
+            sleep(1);
     }
+
 
 #else // default 512 LEDs mode.
 
