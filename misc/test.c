@@ -388,7 +388,12 @@ int main(int argc, char *argv[])
     int count = 0, color = 0;
 
 #ifdef IS31FL3731_COMPATIBLE
+    // MPRO firmware >= v0.25 support gpio driver WS2812B.
+    // note: IS31FL3731 init code is not necessary for MPRO GPIO or I2C mode.
+    uint8_t c = 1;
+    libusb_control_transfer(handle, 0x40, 0xbf, 0, 0, &c, 1, 200);
 
+    // IS31FL3731 init code.
     // read chip id to check if the connect is all right.
     v2s_i2c_write_reg8_byte(0x74, 0xfd, 0x0b);
     v2s_i2c_write_reg8_byte(0x74, 0x0a, 0x00);
@@ -408,6 +413,8 @@ int main(int argc, char *argv[])
     uint8_t reg[0x12];
     memset(reg, 0xff, 0x12);
     v2s_i2c_write_reg8(0x74, 0, reg, 0x12);
+    // IS31FL3731 init code end here.
+
     while (1) {
             uint8_t d[MAX_RGB_LED * 3] = {0};
 
@@ -416,7 +423,7 @@ int main(int argc, char *argv[])
                     memset(d, 0, sizeof(d));
                     d[color + count * 3] = 0xff;
                     v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
-                    usleep(10000);
+                    usleep(100000);
                 }
             }
 
@@ -425,7 +432,7 @@ int main(int argc, char *argv[])
                     memset(d, 0, sizeof(d));
                     d[color + count * 3] = 0xff;
                     v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
-                    usleep(10000);
+                    usleep(100000);
                 }
             }
 
