@@ -62,7 +62,7 @@ debug:
 	@-killall openocd
 
 test:
-	gcc ./misc/test.c -o ledtest -lusb-1.0 $(DEFINES)
+	gcc ./misc/test.c -o ledtest -lusb-1.0 $(DEFINES) -g
 test_w64:
 	x86_64-w64-mingw32-gcc misc/test.c ../mpro/tools/mprotool/libusb/MinGW64/static/libusb-1.0.a -o ledtest.exe -I../mpro/tools/mprotool/libusb/include $(DEFINES)
 

@@ -387,12 +387,12 @@ int main(int argc, char *argv[])
 
     int count = 0, color = 0;
 
-#ifdef IS31FL3731_COMPATIBLE
     // MPRO firmware >= v0.25 support gpio driver WS2812B.
     // note: IS31FL3731 init code is not necessary for MPRO GPIO or I2C mode.
     uint8_t c = 1;
     libusb_control_transfer(handle, 0x40, 0xbf, 0, 0, &c, 1, 200);
 
+#ifdef IS31FL3731_COMPATIBLE
     // IS31FL3731 init code.
     // read chip id to check if the connect is all right.
     v2s_i2c_write_reg8_byte(0x74, 0xfd, 0x0b);
@@ -478,6 +478,9 @@ int main(int argc, char *argv[])
     }
 
 #endif
+
+    c = 0;
+    libusb_control_transfer(handle, 0x40, 0xbf, 0, 0, &c, 1, 200);
 
 end:
     // close usb port.
