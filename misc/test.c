@@ -391,6 +391,7 @@ int main(int argc, char *argv[])
     // note: IS31FL3731 init code is not necessary for MPRO GPIO or I2C mode.
     uint8_t c = 1;
     libusb_control_transfer(handle, 0x40, 0xbf, 0, 0, &c, 1, 200);
+    usleep(1000);
 
 #ifdef IS31FL3731_COMPATIBLE
     // IS31FL3731 init code.
