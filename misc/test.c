@@ -14,6 +14,7 @@
 #endif
 
 #define MAX_RGB_LED    24
+#define DEFAULT_BRIGHTNESS   0xff
 
 static libusb_context *context = NULL;
 static libusb_device_handle *handle = NULL;
@@ -387,12 +388,6 @@ int main(int argc, char *argv[])
 
     int count = 0, color = 0;
 
-    // MPRO firmware >= v0.25 support gpio driver WS2812B.
-    // note: IS31FL3731 init code is not necessary for MPRO GPIO or I2C mode.
-    uint8_t c = 1;
-    libusb_control_transfer(handle, 0x40, 0xbf, 0, 0, &c, 1, 200);
-    usleep(1000);
-
 #ifdef IS31FL3731_COMPATIBLE
     // IS31FL3731 init code.
     // read chip id to check if the connect is all right.
@@ -416,13 +411,13 @@ int main(int argc, char *argv[])
     v2s_i2c_write_reg8(0x74, 0, reg, 0x12);
     // IS31FL3731 init code end here.
 
-    while (1) {
+    for (int loop = 0; loop < 3; loop++) {
             uint8_t d[MAX_RGB_LED * 3] = {0};
 
             for (int color = 0; color < 3; color++) {
                 for (int count = 0; count < MAX_RGB_LED; count++) {
                     memset(d, 0, sizeof(d));
-                    d[color + count * 3] = 0xff;
+                    d[color + count * 3] = DEFAULT_BRIGHTNESS;
                     v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
                     usleep(100000);
                 }
@@ -431,7 +426,7 @@ int main(int argc, char *argv[])
             for (int color = 0; color < 3; color++) {
                 for (int count = MAX_RGB_LED - 1; count >= 0; count--) {
                     memset(d, 0, sizeof(d));
-                    d[color + count * 3] = 0xff;
+                    d[color + count * 3] = DEFAULT_BRIGHTNESS;
                     v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
                     usleep(100000);
                 }
@@ -439,21 +434,21 @@ int main(int argc, char *argv[])
 
             memset(d, 0, sizeof(d));
             for (int count = 0; count < MAX_RGB_LED; count++) {
-                d[count * 3] = 0xff;
+                d[count * 3] = DEFAULT_BRIGHTNESS;
             }
             v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
             sleep(1);
 
             memset(d, 0, sizeof(d));
             for (int count = 0; count < MAX_RGB_LED; count++) {
-                d[count * 3 + 1] = 0xff;
+                d[count * 3 + 1] = DEFAULT_BRIGHTNESS;
             }
             v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
             sleep(1);
 
             memset(d, 0, sizeof(d));
             for (int count = 0; count < MAX_RGB_LED; count++) {
-                d[count * 3 + 2] = 0xff;
+                d[count * 3 + 2] = DEFAULT_BRIGHTNESS;
             }
             v2s_i2c_write_reg8s(0x74, 0x24, d, sizeof(d));
             sleep(1);
@@ -462,7 +457,7 @@ int main(int argc, char *argv[])
 
 #else // default 512 LEDs mode.
 
-    while (1) {
+    for (int loop = 0; loop < 3; loop++) {
         uint8_t d[MAX_RGB_LED * 3] = {0};
 
         d[color + count * 3] = 0x10;
@@ -479,9 +474,6 @@ int main(int argc, char *argv[])
     }
 
 #endif
-
-    c = 0;
-    libusb_control_transfer(handle, 0x40, 0xbf, 0, 0, &c, 1, 200);
 
 end:
     // close usb port.
